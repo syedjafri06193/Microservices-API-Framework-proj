@@ -1,0 +1,93 @@
+syntax = "proto3";
+
+package echo.v1;
+
+option go_package = "github.com/syedjafri06193/microservices-api-framework/gen/echo/v1;echov1";
+
+// EchoService exercises every path the framework cares about, and the
+// idempotency annotations are the point of it.
+//
+// The framework reads `idempotency_level` from this descriptor at runtime
+// and refuses to auto-retry anything that does not declare itself safe. An
+// unannotated method is never retried — fail closed — so enabling retries
+// is an explicit, reviewable change to the service's published contract
+// rather than a line in a config file nobody reviews.
+service EchoService {
+  // Safe to retry: no side effects at all.
+  rpc Echo(EchoRequest) returns (EchoResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // Safe to retry: repeating it produces the same state.
+  rpc SetValue(SetValueRequest) returns (SetValueResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+
+  // NOT annotated, and deliberately named to make the stakes obvious. The
+  // framework will never auto-retry this, because retrying it would charge
+  // the card twice.
+  rpc Charge(ChargeRequest) returns (ChargeResponse);
+
+  // Always fails, for exercising the breaker and the retry budget.
+  rpc Fail(FailRequest) returns (FailResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // Panics, for proving the recovery interceptor is innermost and that the
+  // panic is observed by tracing, logging and metrics on the way out.
+  rpc Panic(PanicRequest) returns (PanicResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // Sleeps, for exercising deadlines and load shedding.
+  rpc Slow(SlowRequest) returns (SlowResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+}
+
+message EchoRequest {
+  string message = 1;
+}
+
+message EchoResponse {
+  string message = 1;
+  // Attempt echoes the grpc-previous-rpc-attempts header, so a test can
+  // prove that retries are marked for downstream services.
+  string attempt = 2;
+}
+
+message SetValueRequest {
+  string key = 1;
+  string value = 2;
+}
+
+message SetValueResponse {
+  int32 revision = 1;
+}
+
+message ChargeRequest {
+  string account = 1;
+  int64 amount_cents = 2;
+}
+
+message ChargeResponse {
+  string charge_id = 1;
+}
+
+message FailRequest {
+  // Code is the connect code to return, as a string: "unavailable",
+  // "invalid_argument", and so on. This is what lets one test prove that a
+  // client fault never trips the breaker while a server fault does.
+  string code = 1;
+}
+
+message FailResponse {}
+
+message PanicRequest {}
+message PanicResponse {}
+
+message SlowRequest {
+  int32 delay_ms = 1;
+}
+
+message SlowResponse {}

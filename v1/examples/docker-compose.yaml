@@ -1,0 +1,30 @@
+# Local development: a collector to send traces to, and Prometheus to
+# scrape the admin port.
+#
+#   docker compose -f examples/docker-compose.yaml up -d
+#   SERVICE_NAME=echo ENVIRONMENT=dev \
+#     OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318 \
+#     OTEL_EXPORTER_OTLP_INSECURE=true \
+#     go run ./examples/minimal
+#
+# Traces land in Jaeger at http://localhost:16686.
+
+services:
+  # The collector receives OTLP over HTTP on 4318, which is what the
+  # framework's exporter speaks. The gRPC exporter would work too and
+  # would drag grpc-go into every user's dependency tree; see
+  # docs/dependencies.md for why the HTTP one is the default.
+  jaeger:
+    image: jaegertracing/all-in-one:1.62.0
+    ports:
+      - "16686:16686"   # UI
+      - "4318:4318"     # OTLP/HTTP
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    ports:
+      - "9092:9090"
+    volumes:
+      - ./prometheus.yaml:/etc/prometheus/prometheus.yml:ro

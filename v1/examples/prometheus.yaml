@@ -1,0 +1,11 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  # The admin port, not the main one. Scraping /metrics from the public
+  # listener would mean load shedding on that listener can take down your
+  # ability to observe the incident that caused it.
+  - job_name: services
+    static_configs:
+      - targets:
+          - host.docker.internal:9090

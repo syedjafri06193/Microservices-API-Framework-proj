@@ -1,0 +1,93 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: v1
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache-dependency-path: v1/go.sum
+
+      # The committed go.mod pins every dependency to a local checkout,
+      # because the machine this was built on cannot reach the module
+      # proxy. On a runner that can, the replace block is removed and the
+      # modules are fetched normally — which also verifies the claim in
+      # docs/building.md that nothing here depends on the block existing.
+      - name: Resolve dependencies from the module proxy
+        run: |
+          python3 - <<'PY'
+          import re
+          src = open('go.mod').read()
+          src = re.sub(r'\n// The module proxy is unreachable.*?\n\)\n', '\n', src, flags=re.S)
+          src = re.sub(r'\nreplace \([^)]*\)\n', '\n', src)
+          src = re.sub(r'\nreplace [^\n]*\n', '\n', src)
+          open('go.mod', 'w').write(src)
+          PY
+          go mod tidy
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Test with the race detector
+        run: go test -race ./...
+
+      # The first thing a skeptical Go developer asks for. Having it ready
+      # is worth more than a paragraph about how lightweight the framework
+      # is; a regression here is one users will feel.
+      - name: Benchmark the chain overhead
+        run: go test ./service/ -run '^$' -bench=ChainOverhead -benchmem | tee bench.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: benchmark
+          path: v1/bench.txt
+
+  generated-code-is-current:
+    # A stale gen/ is a silent trap: the code compiles, the tests pass, and
+    # the idempotency annotations the retry policy reads are whatever they
+    # were last time somebody remembered to regenerate.
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: v1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache-dependency-path: v1/go.sum
+
+      - name: Install protoc
+        run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
+
+      - name: Regenerate and diff
+        run: |
+          python3 - <<'PY'
+          import re
+          src = open('go.mod').read()
+          src = re.sub(r'\n// The module proxy is unreachable.*?\n\)\n', '\n', src, flags=re.S)
+          src = re.sub(r'\nreplace \([^)]*\)\n', '\n', src)
+          src = re.sub(r'\nreplace [^\n]*\n', '\n', src)
+          open('go.mod', 'w').write(src)
+          PY
+          go mod tidy
+          go install google.golang.org/protobuf/cmd/protoc-gen-go
+          go install connectrpc.com/connect/cmd/protoc-gen-connect-go
+          export PATH="$(go env GOPATH)/bin:$PATH"
+          protoc --proto_path=proto \
+            --go_out=gen --go_opt=module=github.com/syedjafri06193/microservices-api-framework/gen \
+            --connect-go_out=gen --connect-go_opt=module=github.com/syedjafri06193/microservices-api-framework/gen \
+            proto/echo/v1/echo.proto
+          git diff --exit-code -- gen/ \
+            || (echo "gen/ is stale; regenerate it and commit the result" && exit 1)
