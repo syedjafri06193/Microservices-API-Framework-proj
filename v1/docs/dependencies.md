@@ -46,7 +46,6 @@ service.
 
 ## Building offline
 
-The `replace` block in `go.mod` points every dependency at a local checkout,
-because the machine this was built on cannot reach `proxy.golang.org`. On a
-machine with a working proxy, delete the block and run `go mod tidy`; the
-framework itself depends on nothing unusual. See `building.md`.
+Normal builds use the public module proxy. For air-gapped machines you can
+add a local `replace` block — see `building.md`. The framework itself
+depends on nothing unusual.

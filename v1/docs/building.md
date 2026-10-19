@@ -8,20 +8,14 @@ go build ./...
 go test ./...
 ```
 
-## This repository, as committed
+That is what this repository expects out of the box. Dependencies come from
+`proxy.golang.org` like any other Go module.
 
-The `go.mod` carries a large `replace` block pointing every dependency at a
-sibling checkout. That is an artifact of the environment this was built in,
-not a design choice: `proxy.golang.org` is unreachable from it, and the
-vanity import paths (`connectrpc.com/...`, `go.opentelemetry.io/...`) cannot
-be resolved either, so `GOPROXY=direct` does not help.
+## Offline / air-gapped builds
 
-The dependencies are ordinary modules at ordinary release tags, cloned from
-their upstream GitHub repositories.
-
-### To build it as committed
-
-Clone the dependencies next to this repository:
+If the module proxy is unreachable, you can point every dependency at a
+local checkout with a `replace` block in `go.mod` (same shape CI used to
+strip before fetching). Clone the upstream repos next to this tree:
 
 ```bash
 mkdir -p ../../godeps && cd ../../godeps
@@ -29,17 +23,10 @@ git clone --branch v1.19.2  https://github.com/connectrpc/connect-go.git       c
 git clone --branch v0.9.0   https://github.com/connectrpc/otelconnect-go.git   otelconnect
 git clone --branch v1.38.0  https://github.com/open-telemetry/opentelemetry-go.git otel
 git clone --branch v0.50.0  https://github.com/golang/net.git                  net
-# ... and the rest; every path in the replace block maps to one clone
+# ... map each module path to a sibling dir, then add replace lines in go.mod
 ```
 
-The full list is the `replace` block itself — each line names the module and
-the directory it expects.
-
-### To build it normally
-
-Delete the `replace` block and run `go mod tidy`. Nothing in the framework
-depends on the block existing; no source file imports anything unusual. This
-is the first thing to do on a machine with a working module proxy.
+Nothing in the framework source depends on those replaces existing.
 
 ## Regenerating the protobuf code
 

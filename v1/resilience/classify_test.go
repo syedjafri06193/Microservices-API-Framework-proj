@@ -3,6 +3,7 @@ package resilience
 import (
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 	"time"
 
@@ -72,7 +73,23 @@ func TestRetryableIsNarrowerThanFailure(t *testing.T) {
 
 func TestCancelledCallerIsNotRetried(t *testing.T) {
 	require.False(t, IsRetryable(context.Canceled))
+	require.False(t, IsRetryable(context.DeadlineExceeded))
 	require.False(t, IsRetryable(nil))
+}
+
+func TestBareContextErrorsDoNotTripBreaker(t *testing.T) {
+	// Regression: raw context sentinels used to fall through as CodeUnknown
+	// and count as server faults, so client cancels looked like the
+	// dependency being unhealthy.
+	require.False(t, CountsAsFailure(context.Canceled))
+	require.False(t, CountsAsFailure(context.DeadlineExceeded))
+	require.False(t, CountsAsFailure(fmt.Errorf("wrapped: %w", context.Canceled)))
+
+	// A real server-side deadline is still a fault — that path uses the
+	// connect code, not a bare context error.
+	serverDL := connect.NewError(connect.CodeDeadlineExceeded, errors.New("server too slow"))
+	require.True(t, CountsAsFailure(serverDL))
+	require.True(t, IsRetryable(serverDL), "peer deadline should still be retryable")
 }
 
 type stubClock struct{ t time.Time }

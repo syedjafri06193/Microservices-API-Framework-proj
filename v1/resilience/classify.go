@@ -46,6 +46,17 @@ func CountsAsFailure(err error) bool {
 		return false
 	}
 
+	// Bare context errors (CodeUnknown — not a connect.Error) mean the
+	// *caller* gave up. Without this, a wave of cancelled requests trips
+	// every breaker on the path even though the dependency is fine.
+	// connect.CodeCanceled / CodeDeadlineExceeded are handled in the
+	// switch below; this only catches the raw context sentinels.
+	if connect.CodeOf(err) == connect.CodeUnknown {
+		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+			return false
+		}
+	}
+
 	switch connect.CodeOf(err) {
 	// Server faults. The dependency is unhealthy.
 	case connect.CodeUnavailable, // cannot reach it
@@ -106,9 +117,14 @@ func IsRetryable(err error) bool {
 		return false
 	}
 
-	// A cancelled or expired context means the caller is no longer waiting.
-	// Another attempt would be work nobody reads.
+	// A cancelled context means the caller is no longer waiting.
 	if errors.Is(err, context.Canceled) {
+		return false
+	}
+	// Bare local deadline (CodeUnknown) — caller already gave up. Do not
+	// conflate with connect.CodeDeadlineExceeded from the peer, which is
+	// still worth another attempt under the deadline budget.
+	if connect.CodeOf(err) == connect.CodeUnknown && errors.Is(err, context.DeadlineExceeded) {
 		return false
 	}
 
