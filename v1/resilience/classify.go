@@ -46,6 +46,14 @@ func CountsAsFailure(err error) bool {
 		return false
 	}
 
+	// Raw ctx cancel/deadline lands as CodeUnknown and is not a connect.Error.
+	// Caller bailed — dont count that against the dependency.
+	if connect.CodeOf(err) == connect.CodeUnknown {
+		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+			return false
+		}
+	}
+
 	switch connect.CodeOf(err) {
 	// Server faults. The dependency is unhealthy.
 	case connect.CodeUnavailable, // cannot reach it
@@ -106,9 +114,11 @@ func IsRetryable(err error) bool {
 		return false
 	}
 
-	// A cancelled or expired context means the caller is no longer waiting.
-	// Another attempt would be work nobody reads.
 	if errors.Is(err, context.Canceled) {
+		return false
+	}
+	// local deadline only — peer CodeDeadlineExceeded still goes thru below
+	if connect.CodeOf(err) == connect.CodeUnknown && errors.Is(err, context.DeadlineExceeded) {
 		return false
 	}
 

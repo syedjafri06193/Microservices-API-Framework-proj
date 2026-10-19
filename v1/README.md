@@ -86,9 +86,8 @@ SERVICE_NAME=echo ENVIRONMENT=dev OTEL_TRACES_EXPORTER=stdout \
   go run ./examples/minimal
 ```
 
-The `go.mod` carries a `replace` block because the machine this was built on
-cannot reach `proxy.golang.org`. On a normal machine, delete it and run
-`go mod tidy` — nothing here depends on it. See [`docs/building.md`](docs/building.md).
+`go mod tidy` / `go test ./...` should just work now. Offline/`replace` notes
+are in [`docs/building.md`](docs/building.md) if you need them.
 
 ## Layout
 

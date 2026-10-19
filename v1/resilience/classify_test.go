@@ -3,6 +3,7 @@ package resilience
 import (
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 	"time"
 
@@ -72,7 +73,19 @@ func TestRetryableIsNarrowerThanFailure(t *testing.T) {
 
 func TestCancelledCallerIsNotRetried(t *testing.T) {
 	require.False(t, IsRetryable(context.Canceled))
+	require.False(t, IsRetryable(context.DeadlineExceeded))
 	require.False(t, IsRetryable(nil))
+}
+
+func TestRawContextCancelDoesntCountAsFailure(t *testing.T) {
+	require.False(t, CountsAsFailure(context.Canceled))
+	require.False(t, CountsAsFailure(context.DeadlineExceeded))
+	require.False(t, CountsAsFailure(fmt.Errorf("wrap: %w", context.Canceled)))
+
+	// peer deadline still counts
+	err := connect.NewError(connect.CodeDeadlineExceeded, errors.New("slow"))
+	require.True(t, CountsAsFailure(err))
+	require.True(t, IsRetryable(err))
 }
 
 type stubClock struct{ t time.Time }
