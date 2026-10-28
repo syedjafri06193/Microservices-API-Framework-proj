@@ -9,7 +9,7 @@
 // becomes every user's dependency tree, and those two libraries bring six
 // modules for work that the standard library can do. The struct tags are
 // deliberately the same shape, so switching to them later is mechanical.
-// See docs/dependencies.md.
+// See 1—Documentation/v1/dependencies.md.
 package config
 
 import (

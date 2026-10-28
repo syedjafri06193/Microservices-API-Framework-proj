@@ -13,7 +13,7 @@ services:
   # The collector receives OTLP over HTTP on 4318, which is what the
   # framework's exporter speaks. The gRPC exporter would work too and
   # would drag grpc-go into every user's dependency tree; see
-  # docs/dependencies.md for why the HTTP one is the default.
+  # 1—Documentation/v1/dependencies.md for why the HTTP one is the default.
   jaeger:
     image: jaegertracing/all-in-one:1.62.0
     ports:

@@ -30,7 +30,7 @@ import (
 // The entire point of the framework is that a user's main() is about twenty
 // lines: construct, register a handler, Run. But New is a convenience, not
 // the only door — every part it assembles is exported and usable alone. See
-// the escape hatches at the bottom of this file, and docs/escape-hatches.md.
+// the escape hatches at the bottom of this file, and 1—Documentation/v1/escape-hatches.md.
 type Service struct {
 	cfg    Config
 	logger *slog.Logger
@@ -138,7 +138,7 @@ func NewWithConfig(cfg Config, opts ...Option) (*Service, error) {
 		logger.Warn("metric cardinality is high",
 			slog.String("metric", metric),
 			slog.Int("series", series),
-			slog.String("hint", "check for an unbounded label; see docs/cardinality.md"))
+			slog.String("hint", "check for an unbounded label; see 1—Documentation/v1/cardinality.md"))
 	})
 
 	if err := s.buildResilience(); err != nil {
@@ -276,7 +276,7 @@ func (s *Service) warnOnMeshOverlap() {
 			"this may amplify load during a partial outage",
 		slog.String("mesh", mesh),
 		slog.String("hint", "set RETRY_ENABLED=false to let the mesh own retries, "+
-			"or disable retries in the mesh; see docs/service-mesh.md"))
+			"or disable retries in the mesh; see 1—Documentation/v1/service-mesh.md"))
 }
 
 // ---------------------------------------------------------------- public
@@ -553,7 +553,7 @@ func (s *Service) clientChain(target string) ([]connect.Interceptor, error) {
 		OnMissing: func(procedure string) {
 			s.logger.Warn("outbound call has no deadline",
 				slog.String("procedure", procedure),
-				slog.String("hint", "an unbounded call path; see docs/resilience.md"))
+				slog.String("hint", "an unbounded call path; see 1—Documentation/v1/resilience.md"))
 		},
 	}
 
