@@ -63,3 +63,30 @@ All documentation lives in [`1—Documentation/`](1—Documentation/README.md).
 | [v1](v1/) | Connect + OTel wiring, ordered interceptors, breaker/retry/budget/deadline/shed, lifecycle | — |
 
 Add a row per version as new iterations land.
+
+<!-- project-metrics:start -->
+## Project Metrics
+
+[![Stars](https://img.shields.io/github/stars/syedjafri06193/Microservices-API-Framework-proj?style=flat-square)](https://github.com/syedjafri06193/Microservices-API-Framework-proj/stargazers) [![Forks](https://img.shields.io/github/forks/syedjafri06193/Microservices-API-Framework-proj?style=flat-square)](https://github.com/syedjafri06193/Microservices-API-Framework-proj/forks) [![Open issues](https://img.shields.io/github/issues/syedjafri06193/Microservices-API-Framework-proj?style=flat-square)](https://github.com/syedjafri06193/Microservices-API-Framework-proj/issues) [![Last commit](https://img.shields.io/github/last-commit/syedjafri06193/Microservices-API-Framework-proj/improvements?style=flat-square)](https://github.com/syedjafri06193/Microservices-API-Framework-proj/commits/improvements) [![Commits](https://img.shields.io/github/commit-activity/t/syedjafri06193/Microservices-API-Framework-proj?style=flat-square)](https://github.com/syedjafri06193/Microservices-API-Framework-proj/commits/improvements) [![Top language](https://img.shields.io/github/languages/top/syedjafri06193/Microservices-API-Framework-proj?style=flat-square)](https://github.com/syedjafri06193/Microservices-API-Framework-proj) [![Repo size](https://img.shields.io/github/repo-size/syedjafri06193/Microservices-API-Framework-proj?style=flat-square)](https://github.com/syedjafri06193/Microservices-API-Framework-proj)
+
+### Code
+
+| Metric | Value |
+|---|---|
+| Lines of code | 3,828 |
+| Source files | 48 |
+| Tracked files | 67 |
+| Documentation | 13 Markdown files (16,719 words), 1 PDF |
+| Commits | 11 |
+| Contributors | 2 |
+| Active | 2026-09-11 → 2026-10-28 |
+
+| Language | Lines | Share |
+|---|---:|---:|
+| Go | 3,727 | 97.4% |
+| Modula-2 | 42 | 1.1% |
+| Protocol Buffer | 38 | 1.0% |
+| YAML | 21 | 0.5% |
+
+<sub>Code stats as of 2026-10-28, counted with pygount (comments and blank lines excluded). Badges update live.</sub>
+<!-- project-metrics:end -->
