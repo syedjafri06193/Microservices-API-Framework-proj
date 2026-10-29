@@ -22,7 +22,7 @@ import (
 //	service.WithValidator(v)
 //
 // Teams that want it pay for it; teams that validate another way, or in the
-// handler, pay nothing. See docs/dependencies.md.
+// handler, pay nothing. See 1—Documentation/v1/dependencies.md.
 type Validator interface {
 	Validate(msg proto.Message) error
 }

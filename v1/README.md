@@ -5,8 +5,8 @@ An opinionated wiring layer over [connect-go](https://connectrpc.com) and
 correct-by-default observability, resilience and lifecycle handling in one
 function call.
 
-The implementation of the design in [`../Documentation/README.md`](../Documentation/README.md).
-Where this departs from that document, [`docs/notes-on-the-spec.md`](docs/notes-on-the-spec.md)
+The implementation of the design in [`../1—Documentation/design-guide.md`](../1—Documentation/design-guide.md).
+Where this departs from that document, [`../1—Documentation/v1/notes-on-the-spec.md`](../1—Documentation/v1/notes-on-the-spec.md)
 says where and why.
 
 ## What this is, and what it is not
@@ -87,7 +87,7 @@ SERVICE_NAME=echo ENVIRONMENT=dev OTEL_TRACES_EXPORTER=stdout \
 ```
 
 `go mod tidy` / `go test ./...` should just work now. Offline/`replace` notes
-are in [`docs/building.md`](docs/building.md) if you need them.
+are in [`../1—Documentation/v1/building.md`](../1—Documentation/v1/building.md) if you need them.
 
 ## Layout
 
@@ -105,7 +105,7 @@ examples/      minimal, and two services showing a trace across a hop
 Every package is usable with none of the others. That is not decoration:
 teams adopt tools they can abandon incrementally, and a framework that owns
 `main()` with no way out is one nobody will risk. See
-[`docs/escape-hatches.md`](docs/escape-hatches.md).
+[`../1—Documentation/v1/escape-hatches.md`](../1—Documentation/v1/escape-hatches.md).
 
 ## The two ports
 
@@ -136,21 +136,21 @@ It warns rather than disabling anything, because detection is heuristic and
 a false positive that silently removed your resilience would be worse. Set
 `RETRY_ENABLED=false` and `BREAKER_ENABLED=false` and keep the rest — the
 deadline budgets, semantic failure handling and per-method policy are things
-a sidecar structurally cannot do. See [`docs/service-mesh.md`](docs/service-mesh.md).
+a sidecar structurally cannot do. See [`../1—Documentation/v1/service-mesh.md`](../1—Documentation/v1/service-mesh.md).
 
 ## Documentation
 
 | | |
 |---|---|
-| [interceptor-order.md](docs/interceptor-order.md) | Why the chain is ordered as it is, adjacency by adjacency |
-| [resilience.md](docs/resilience.md) | Breaker classification, retry budgets, deadline budgets, shedding |
-| [lifecycle.md](docs/lifecycle.md) | Startup, the three health questions, the shutdown sequence |
-| [cardinality.md](docs/cardinality.md) | Why label values are a closed type |
-| [service-mesh.md](docs/service-mesh.md) | When to turn resilience off |
-| [escape-hatches.md](docs/escape-hatches.md) | Taking one piece and leaving the rest |
-| [dependencies.md](docs/dependencies.md) | What is depended on, and what is deliberately not |
-| [building.md](docs/building.md) | Including the offline `replace` block and codegen |
-| [notes-on-the-spec.md](docs/notes-on-the-spec.md) | Where this departs from the design |
+| [interceptor-order.md](../1—Documentation/v1/interceptor-order.md) | Why the chain is ordered as it is, adjacency by adjacency |
+| [resilience.md](../1—Documentation/v1/resilience.md) | Breaker classification, retry budgets, deadline budgets, shedding |
+| [lifecycle.md](../1—Documentation/v1/lifecycle.md) | Startup, the three health questions, the shutdown sequence |
+| [cardinality.md](../1—Documentation/v1/cardinality.md) | Why label values are a closed type |
+| [service-mesh.md](../1—Documentation/v1/service-mesh.md) | When to turn resilience off |
+| [escape-hatches.md](../1—Documentation/v1/escape-hatches.md) | Taking one piece and leaving the rest |
+| [dependencies.md](../1—Documentation/v1/dependencies.md) | What is depended on, and what is deliberately not |
+| [building.md](../1—Documentation/v1/building.md) | Including the offline `replace` block and codegen |
+| [notes-on-the-spec.md](../1—Documentation/v1/notes-on-the-spec.md) | Where this departs from the design |
 
 ## Status
 
